@@ -33,9 +33,7 @@ public:
 
     // Создаёт вектор из size элементов, инициализированных значением value
     SimpleVector(size_t size, const Type& value) : items_(size), size_(size), capacity_(size) {
-        for (size_t i = 0; i < size_; i++) {
-            items_[i] = value;
-        }
+        std::fill_n(items_, size_, value);
     }
 
     // Создаёт вектор из std::initializer_list
@@ -43,9 +41,7 @@ public:
         items_(init.size()),
         size_(init.size()),
         capacity_(init.size()) {
-        for (size_t i = 0; i < init.size(); i++) {
-            items_[i] = *(init.begin() + i);
-        }
+        std::copy(init.begin(), init.end(), items_);
     }
 
     SimpleVector(const SimpleVector& other) {
@@ -53,14 +49,12 @@ public:
         items_.swap(temp.items_);
         size_ = temp.size_;
         capacity_ = temp.capacity_;
-        for (size_t i = 0; i < size_; i++) {
-            items_[i] = other.items_[i];
-        }
+        std::copy(other.begin(), other.end(), items_);
     }
 
     SimpleVector(SimpleVector&& other) {
         SimpleVector temp(other.size_);
-        items_.swap(temp.items_);
+        items_.swap(std::move(temp.items_));
 
         for (size_t i = 0; i < other.size_; i++) {
             items_[i] = std::move(other.items_[i]);
@@ -116,6 +110,7 @@ public:
     // Если перед вставкой значения вектор был заполнен полностью,
     // вместимость вектора должна увеличиться вдвое, а для вектора вместимостью 0 стать равной 1
     Iterator Insert(ConstIterator pos, const Type& value) {
+        assert(pos >= begin() && pos <= end());
         if (capacity_ == 0) {
             size_ = 1;
             capacity_ = 1;
@@ -162,6 +157,7 @@ public:
     }
 
     Iterator Insert(Iterator pos, Type&& value) {
+        assert(pos >= begin() && pos <= end());
         if (capacity_ == 0) {
             size_ = 1;
             capacity_ = 1;
@@ -208,11 +204,13 @@ public:
 
     // "Удаляет" последний элемент вектора. Вектор не должен быть пустым
     void PopBack() noexcept {
+        assert(size_ != 0);
         --size_;
     }
 
     // Удаляет элемент вектора в указанной позиции
     Iterator Erase(ConstIterator pos) {
+        assert(pos >= begin() && pos <= end());
         Iterator new_pos = this->begin();
         size_t count = 0;
         for (size_t i = 0; i < size_; i++) {
@@ -231,18 +229,9 @@ public:
 
     // Обменивает значение с другим вектором
     void swap(SimpleVector& other) noexcept {
-
-        this->items_.swap(other.items_);
-
-        auto temp_size = this->size_;
-        auto temp_capacity = this->capacity_;
-
-        this->size_ = other.size_;
-        this->capacity_ = other.capacity_;
-
-        other.size_ = temp_size;
-        other.capacity_ = temp_capacity;
-
+        items_.swap(std::move(other.items_));
+        std::swap(size_, other.size_);
+        std::swap(capacity_, other.capacity_);
     }
 
     // Возвращает количество элементов в массиве
@@ -262,11 +251,13 @@ public:
 
     // Возвращает ссылку на элемент с индексом index
     Type& operator[](size_t index) noexcept {
+        assert(index < size_);
         return items_[index];
     }
 
     // Возвращает константную ссылку на элемент с индексом index
     const Type& operator[](size_t index) const noexcept {
+        assert(index < size_);
         return items_[index];
     }
 
@@ -308,7 +299,7 @@ public:
             capacity_ = size_ * 2;
         }
 
-        items_.swap(temp);
+        items_.swap(std::move(temp));
     }
 
     void Reserve(size_t new_capacity) {

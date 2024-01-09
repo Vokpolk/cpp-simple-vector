@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include <cstdlib>
+#include <utility>
 
 template <typename Type>
 class ArrayPtr {
@@ -29,12 +30,25 @@ public:
     // Запрещаем копирование
     ArrayPtr(const ArrayPtr&) = delete;
 
+    ArrayPtr(ArrayPtr&& other) {
+        raw_ptr_ = other.raw_ptr_;
+        other.raw_ptr_ = nullptr;
+    }
+
     ~ArrayPtr() {
         delete[] raw_ptr_;
     }
 
     // Запрещаем присваивание
     ArrayPtr& operator=(const ArrayPtr&) = delete;
+
+    ArrayPtr&& operator=(ArrayPtr&& other) {
+        if (this != &other) {
+            raw_ptr_ = other.raw_ptr_;
+            other.raw_ptr_ = nullptr;
+        }
+        return std::move(*this);
+    }
 
     // Прекращает владением массивом в памяти, возвращает значение адреса массива
     // После вызова метода указатель на массив должен обнулиться
@@ -71,10 +85,8 @@ public:
     }
 
     // Обменивается значениям указателя на массив с объектом other
-    void swap(ArrayPtr& other) noexcept {
-        Type* temp = raw_ptr_;
-        raw_ptr_ = other.raw_ptr_;
-        other.raw_ptr_ = temp;
+    void swap(ArrayPtr&& other) noexcept {
+        std::swap(*this, other);
     }
 
 private:
