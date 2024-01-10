@@ -44,7 +44,7 @@ public:
 
     ArrayPtr& operator=(ArrayPtr&& other) {
         if (this != &other) {
-            this->swap(std::move(other));
+            this->swap(other);
         }
         return *this;
     }
@@ -85,6 +85,10 @@ public:
 
     // Обменивается значениям указателя на массив с объектом other
     void swap(ArrayPtr&& other) noexcept {
+        std::swap(this->raw_ptr_, other.raw_ptr_);
+    }
+
+    void swap(ArrayPtr& other) noexcept {
         std::swap(this->raw_ptr_, other.raw_ptr_);
     }
 
