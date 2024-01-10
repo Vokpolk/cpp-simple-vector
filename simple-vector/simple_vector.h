@@ -210,7 +210,7 @@ public:
 
     // Удаляет элемент вектора в указанной позиции
     Iterator Erase(ConstIterator pos) {
-        assert(pos >= begin() && pos <= end());
+        assert(pos >= begin() && pos < end());
         Iterator new_pos = this->begin();
         size_t count = 0;
         for (size_t i = 0; i < size_; i++) {
