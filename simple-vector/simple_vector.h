@@ -73,12 +73,12 @@ public:
         return *this;
     }
 
-    SimpleVector&& operator=(SimpleVector&& rhs) {
+    SimpleVector& operator=(SimpleVector&& rhs) {
         if (this != &rhs) {
             auto rhs_copy(std::move(rhs));
             this->swap(rhs_copy);
         }
-        return std::move(*this);
+        return *this;
     }
 
     // Добавляет элемент в конец вектора

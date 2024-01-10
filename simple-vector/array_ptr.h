@@ -42,11 +42,11 @@ public:
     // «апрещаем присваивание
     ArrayPtr& operator=(const ArrayPtr&) = delete;
 
-    ArrayPtr&& operator=(ArrayPtr&& other) {
+    ArrayPtr& operator=(ArrayPtr&& other) {
         if (this != &other) {
             this->swap(std::move(other));
         }
-        return std::move(*this);
+        return *this;
     }
 
     // ѕрекращает владением массивом в пам€ти, возвращает значение адреса массива
